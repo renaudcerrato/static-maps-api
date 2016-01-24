@@ -176,6 +176,27 @@ public final class StaticMap {
     }
 
     /**
+     * @see #visible(GeoPoint)
+     * @param address to add
+     * @return this instance
+     */
+    public StaticMap visible(String address) {
+        visible.add(new GeoPoint(address));
+        return this;
+    }
+
+    /**
+     * @see #visible(GeoPoint)
+     * @param latitude to add
+     * @param longitude to add
+     * @return this instance
+     */
+    public StaticMap visible(double latitude, double longitude) {
+        visible.add(new GeoPoint(latitude, longitude));
+        return this;
+    }
+
+    /**
      * Images may specify a viewport by adding visible locations.
      * The visible parameter instructs the Google Static Maps API service to construct a map such
      * that the specified locations remain visible (this parameter may be combined with existing
@@ -620,7 +641,7 @@ public final class StaticMap {
 
             final String icon;
             final Integer color;
-            final String label;
+            final Character label;
             final Size size;
 
             Style(Builder builder) {
@@ -641,7 +662,7 @@ public final class StaticMap {
             }
 
             @Nullable
-            public String label() {
+            public Character label() {
                 return label;
             }
 
@@ -682,7 +703,7 @@ public final class StaticMap {
 
                 String icon;
                 Integer color;
-                String label;
+                Character label;
                 Size size;
 
                 Builder(Style style) {
@@ -730,11 +751,11 @@ public final class StaticMap {
 
                 /**
                  * Specifies a single uppercase alphanumeric character from the set {A-Z, 0-9}.
-                 * @param label containing exclusively the character set {A-Z, 0-9}
+                 * @param label character from the set {A-Z, 0-9}
                  * @return this instance
                  */
-                public Builder label(String label) {
-                    this.label = label;
+                public Builder label(char label) {
+                    this.label = Character.toUpperCase(label);
                     return this;
                 }
 
