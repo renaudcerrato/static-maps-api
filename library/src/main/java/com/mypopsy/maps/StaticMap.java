@@ -6,6 +6,7 @@ import com.mypopsy.maps.internal.UrlBuilder;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -26,9 +27,14 @@ public final class StaticMap {
     private static final String HTTP = "http://" + BASE_URL;
     private static final String HTTPS = "https://" + BASE_URL;
 
+    public static final int DEFAULT_SCALE = 1;
+    public static final Format DEFAULT_FORMAT = Format.PNG;
+    public static final Type DEFAULT_TYPE = Type.ROADMAP;
+
     public static final int NO_WIDTH = -1;
     public static final int NO_HEIGHT = -1;
     public static final int NO_ZOOM = -1;
+
 
     /**
      * Map Types
@@ -102,9 +108,26 @@ public final class StaticMap {
     private String apiKey;
     private boolean https = true;
 
+    public StaticMap() { }
+
+    public StaticMap(StaticMap other) {
+        markers = new ArrayList<>(other.markers);
+        visible = new ArrayList<>(other.visible);
+        paths = new ArrayList<>(other.paths);
+        center = other.center;
+        zoom = other.zoom;
+        scale = other.scale;
+        width = other.width;
+        height = other.height;
+        format = other.format;
+        type = other.type;
+        apiKey = other.apiKey;
+        https = other.https;
+    }
 
     /**
      * Explicitely center the map on the given {@link GeoPoint geopoint}
+     * @see #center(GeoPoint)
      * @param point of the center
      * @return this instance
      */
@@ -115,6 +138,7 @@ public final class StaticMap {
 
     /**
      * Explicitely center the map on the given latitude/longitude
+     * @see #center(GeoPoint)
      * @param latitude of the center
      * @param longitude of the center
      * @return this instance
@@ -124,7 +148,7 @@ public final class StaticMap {
     }
 
     /**
-     * @see {@link #center(GeoPoint)}
+     * @see #center(GeoPoint)
      * @param address of the center
      * @return this instance
      */
@@ -142,47 +166,67 @@ public final class StaticMap {
     }
 
     /**
-     * Images may specify a viewport by specifying visible locations.
-     * The visible parameter instructs the Google Static Maps API service to construct a map such
-     * that the specified locations remain visible (this parameter may be combined with existing
-     * markers or paths to define a visible region as well).
-     * Defining a viewport in this manner obviates the need to specify an exact zoom level.
+     * @see #visible(GeoPoint...)
      * @param geoPoint to add
      * @return this instance
      */
-    public StaticMap addVisible(GeoPoint geoPoint) {
+    public StaticMap visible(GeoPoint geoPoint) {
         visible.add(geoPoint);
         return this;
     }
 
     /**
+     * Images may specify a viewport by adding visible locations.
+     * The visible parameter instructs the Google Static Maps API service to construct a map such
+     * that the specified locations remain visible (this parameter may be combined with existing
+     * markers or paths to define a visible region as well).
+     * Defining a viewport in this manner obviates the need to specify an exact zoom level.
+     * @param geoPoints to add
+     * @return this instance
+     */
+    public StaticMap visible(GeoPoint ...geoPoints) {
+        visible.addAll(Arrays.asList(geoPoints));
+        return this;
+    }
+
+    /**
+     * Query for any previously added visible locations
+     * @see #visible(GeoPoint...)
+     * @return the list of visible locations
+     */
+    public List<GeoPoint> visible() {
+        return visible;
+    }
+
+    /**
      * Add a single {@link Marker marker} with default {@link Marker.Style style).
-     * @see {@link #addMarkers(GeoPoint...)}
+     * @see #marker(GeoPoint...)
      * @param latitude of the marker
      * @param longitude of the marker
      * @return this instance
      */
-    public StaticMap addMarker(double latitude, double longitude) {
-        return addMarkers(new GeoPoint(latitude, longitude));
+    public StaticMap marker(double latitude, double longitude) {
+        return marker(new GeoPoint(latitude, longitude));
     }
 
     /**
      * Add a single {@link Marker marker} with default {@link Marker.Style style).
-     * @see {@link #addMarkers(GeoPoint...)}
+     * @see #marker(GeoPoint...)
      * @param address of the marker
      * @return this instance
      */
-    public StaticMap addMarker(String address) {
-        return addMarkers(new GeoPoint(address));
+    public StaticMap marker(String address) {
+        return marker(new GeoPoint(address));
     }
 
     /**
      * Add {@link Marker marker}(s) using default {@link Marker.Style style).
+     * @see #marker(Marker.Style, GeoPoint...)
      * @param markers to add
      * @return this instance
      */
-    public StaticMap addMarkers(GeoPoint...markers) {
-        return addMarkers(null, markers);
+    public StaticMap marker(GeoPoint...markers) {
+        return marker(null, markers);
     }
 
     /**
@@ -191,13 +235,14 @@ public final class StaticMap {
      * @param markers to add
      * @return this instance
      */
-    public StaticMap addMarkers(Marker.Style style, GeoPoint...markers) {
+    public StaticMap marker(Marker.Style style, GeoPoint...markers) {
         this.markers.add(new MarkerGroup(style, markers));
         return this;
     }
 
     /**
      * Query for the current markers.
+     * @see #marker(Marker.Style, GeoPoint...)
      * @return the markers
      */
     public List<MarkerGroup> markers() {
@@ -206,21 +251,23 @@ public final class StaticMap {
 
     /**
      * Add a {@link Path path} using default {@link Path.Style style)
+     * @see #path(Path.Style, GeoPoint...)
      * @param path to add
      * @return this instance
      */
-    public StaticMap addPath(Path path) {
+    public StaticMap path(Path path) {
         paths.add(path);
         return this;
     }
 
     /**
      * Add a {@link Path path} using default {@link Path.Style Style style)
+     * @see #path(Path.Style, GeoPoint...)
      * @param points to add
      * @return this instance
      */
-    public StaticMap addPath(GeoPoint...points) {
-        addPath(null, points);
+    public StaticMap path(GeoPoint...points) {
+        path(null, points);
         return this;
     }
 
@@ -230,39 +277,17 @@ public final class StaticMap {
      * @param points to add
      * @return this instance
      */
-    public StaticMap addPath(Path.Style style, GeoPoint...points) {
-        addPath(new Path(style, points));
+    public StaticMap path(Path.Style style, GeoPoint...points) {
+        path(new Path(style, points));
         return this;
     }
 
     /**
-     * Clear any previously added {@link Marker marker}.
-     * @see {@link #addMarkers(GeoPoint...)}
-     * @return this instance
+     * @see #path(Path.Style, GeoPoint...)
+     * @return the previously added paths
      */
-    public StaticMap resetMarkers() {
-        markers.clear();
-        return this;
-    }
-
-    /**
-     * Clear any previously added {@link Path path}.
-     * @see {@link #addPath(Path)}
-     * @return this instance
-     */
-    public StaticMap resetPaths() {
-        paths.clear();
-        return this;
-    }
-
-    /**
-     * Clear any previously added visible {@link GeoPoint point}.
-     * @see {@link #addVisible(GeoPoint)}
-     * @return this instance
-     */
-    public StaticMap resetVisible() {
-        visible.clear();
-        return this;
+    public List<Path> paths() {
+        return paths;
     }
 
     /**
@@ -277,6 +302,7 @@ public final class StaticMap {
 
     /**
      * Query for the current zoom value
+     * @see #zoom(int)
      * @return the current zoom or {@link #NO_ZOOM}
      */
     public int zoom() {
@@ -287,7 +313,7 @@ public final class StaticMap {
     /**
      * The scale value is multiplied with the size to determine the actual output size
      * of the image in pixels, without changing the coverage area of the map.
-     * @param scale 1, 2 or 4 (the latter is for Google Maps APIs Premium Plan customers only)
+     * @param scale 1, 2 or 4 (the later is for Google Maps APIs Premium Plan customers only)
      * @return this instance
      */
     public StaticMap scale(int scale) {
@@ -296,8 +322,8 @@ public final class StaticMap {
     }
 
     /**
-     * Query for current scale value.
-     * @see {@link #scale(int)}
+     * Query for the current scale value.
+     * @see #scale(int)
      * @return the current scale value
      */
     public int scale() {
@@ -321,6 +347,7 @@ public final class StaticMap {
 
     /**
      * Query for the current width value
+     * @see #size(int, int)
      * @return the current width or {@link #NO_WIDTH}
      */
     public int width() {
@@ -330,6 +357,7 @@ public final class StaticMap {
 
     /**
      * Query for the current height value
+     * @see #size(int, int)
      * @return the current height or {@link #NO_HEIGHT}
      */
     public int height() {
@@ -340,7 +368,7 @@ public final class StaticMap {
     /**
      * Images may be returned in several common web graphics formats: GIF, JPEG and PNG.
      * @see Format
-     * @param format
+     * @param format of the image
      * @return this instance
      */
     public StaticMap format(Format format) {
@@ -350,6 +378,7 @@ public final class StaticMap {
 
     /**
      * Query for the current {@link Format format}
+     * @see #format(Format)
      * @return the current format
      */
     public Format format() {
@@ -368,7 +397,7 @@ public final class StaticMap {
     }
 
     /**
-     * Specigies the map {@link Type type}
+     * Specifies the map {@link Type type}
      * @param type of the map
      * @return this instance
      */
@@ -379,6 +408,7 @@ public final class StaticMap {
 
     /**
      * Query for the current map {@link Type type}
+     * @see #type(Type)
      * @return the {@link Type type} of the map
      */
     public Type type() {
@@ -404,6 +434,14 @@ public final class StaticMap {
         return this;
     }
 
+    /**
+     * @see #https()
+     * @return true if the current scheme is https
+     */
+    public boolean isHttps() {
+        return https;
+    }
+
     @Override
     public String toString() {
 
@@ -421,15 +459,15 @@ public final class StaticMap {
             builder.appendQuery("zoom", String.valueOf(zoom));
         }
 
-        if(scale != null) {
+        if(scale != null && scale != DEFAULT_SCALE) {
             builder.appendQuery("scale", String.valueOf(scale));
         }
 
-        if(format != null) {
+        if(format != null && format != DEFAULT_FORMAT) {
             builder.appendQuery("format", format.value);
         }
 
-        if(type != null) {
+        if(type != null && type != DEFAULT_TYPE) {
             builder.appendQuery("maptype", type.value);
         }
 
@@ -499,6 +537,17 @@ public final class StaticMap {
             else
                 return address;
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            if(!(obj instanceof GeoPoint)) return false;
+            return hashCode() == obj.hashCode();
+        }
+
+        @Override
+        public int hashCode() {
+            return hash(latitude, longitude, address);
+        }
     }
 
     public static class MarkerGroup {
@@ -514,7 +563,21 @@ public final class StaticMap {
 
         @Override
         public String toString() {
-            return join('|', style, join('|', points));
+            if(style == null || Marker.Style.DEFAULT.equals(style))
+                return join('|', points);
+            else
+                return join('|', style, join('|', points));
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if(!(obj instanceof MarkerGroup)) return false;
+            return hashCode() == obj.hashCode();
+        }
+
+        @Override
+        public int hashCode() {
+            return hash(style == null ? Marker.Style.DEFAULT : style, hash(points));
         }
     }
 
@@ -530,7 +593,8 @@ public final class StaticMap {
 
         public static class Style {
 
-            public static final int DEFAULT_COLOR = 0xff0000;
+            static public final int DEFAULT_COLOR = 0xff0000;
+            static public final Size DEFAULT_SIZE = Size.NORMAL;
 
             static public final Style BLACK  = builder().color(0x000000).build();
             static public final Style PURPLE = builder().color(0x800080).build();
@@ -541,6 +605,8 @@ public final class StaticMap {
             static public final Style YELLOW = builder().color(0xffff00).build();
             static public final Style BLUE   = builder().color(0x0000ff).build();
             static public final Style WHITE  = builder().color(0xffffff).build();
+
+            static public final Style DEFAULT = builder().build();
 
             /**
              * Size of the {@link Marker marker}(s)
@@ -580,7 +646,7 @@ public final class StaticMap {
             }
 
             public Size size() {
-                if(size == null) return Size.NORMAL;
+                if(size == null) return DEFAULT_SIZE;
                 return size;
             }
 
@@ -596,9 +662,20 @@ public final class StaticMap {
             public String toString() {
                 return join('|',
                         icon != null ? "icon:" + icon : null,
-                        size != null && size.value != null ? "size:" + size.value : null,
+                        size() != DEFAULT_SIZE ? "size:" + size.value : null,
                         color != null ? "color:" + rgb(color) : null,
                         label != null ? "label:" + label : null);
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if(!(obj instanceof Style)) return false;
+                return hashCode() == obj.hashCode();
+            }
+
+            @Override
+            public int hashCode() {
+                return hash(icon(), size(), color(), label());
             }
 
             public static class Builder {
@@ -619,7 +696,6 @@ public final class StaticMap {
 
                 }
 
-
                 /**
                  * @see {@link #icon(String)}
                  * @param icon url
@@ -630,8 +706,10 @@ public final class StaticMap {
                 }
 
                 /**
-                 * Specifies a URL to use as the marker's custom icon.
+                 * Specifies an URL to use as the marker's custom icon.
                  * Images may be in PNG, JPEG or GIF formats, though PNG is recommended.
+                 * Note that the Google Static Maps API does not support custom icon URLs
+                 * that use HTTPS; the default icon will be displayed.
                  * @param icon url
                  * @return this instance
                  */
@@ -641,7 +719,7 @@ public final class StaticMap {
                 }
 
                 /**
-                 * Speicifies the {@link Marker marker} color
+                 * Specifies the 24-bit {@link Marker marker} color
                  * @param color RGB 24 bit
                  * @return this instance
                  */
@@ -652,7 +730,7 @@ public final class StaticMap {
 
                 /**
                  * Specifies a single uppercase alphanumeric character from the set {A-Z, 0-9}.
-                 * @param label {A-Z, 0-9}
+                 * @param label containing exclusively the character set {A-Z, 0-9}
                  * @return this instance
                  */
                 public Builder label(String label) {
@@ -663,7 +741,7 @@ public final class StaticMap {
                 /**
                  * Specifies the size of marker.
                  * If no size parameter is set, the marker will appear in its default (normal) size.
-                 * @see {@link Size}
+                 * @see Size
                  * @param size of the marker
                  * @return this instance
                  */
@@ -700,10 +778,26 @@ public final class StaticMap {
                 path = join('|', points);
             }
 
-            return join('|', style, path);
+            if(style == null || Style.DEFAULT.equals(style))
+                return path;
+            else
+                return join('|', style, path);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if(!(obj instanceof Path)) return false;
+            return hashCode() == obj.hashCode();
+        }
+
+        @Override
+        public int hashCode() {
+            return hash(style == null ? Style.DEFAULT : style, hash(points));
         }
 
         static public class Style {
+
+            public static Style DEFAULT = builder().build();
 
             public static final int DEFAULT_STROKE = 5;
             public static final int DEFAULT_COLOR = 0xff;
@@ -747,10 +841,21 @@ public final class StaticMap {
             @Override
             public String toString() {
                 return join('|',
-                        stroke != null ? "weight:" + stroke : null,
-                        color != null ? "color:" + rgba(color) : null,
-                        fillColor != null ? "fillcolor:" + rgba(fillColor) : null,
+                        stroke() != DEFAULT_STROKE ? "weight:" + stroke : null,
+                        color() != DEFAULT_COLOR ? "color:" + rgba(color) : null,
+                        fillColor() != NO_FILL_COLOR ? "fillcolor:" + rgba(fillColor) : null,
                         geodesic ? "geodesic:true" : null);
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if(!(obj instanceof Style)) return false;
+                return hashCode() == obj.hashCode();
+            }
+
+            @Override
+            public int hashCode() {
+                return hash(stroke(), color(), fillColor(), isGeodesic());
             }
 
             public static Builder builder() {
@@ -860,6 +965,10 @@ public final class StaticMap {
                 return new Path(style, points);
             }
         }
+    }
+
+    private static int hash(Object ...objects) {
+        return Arrays.hashCode(objects);
     }
 
     private static String rgb(int argb) {
