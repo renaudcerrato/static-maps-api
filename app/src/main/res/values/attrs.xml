@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="AspectLockedImageView">
+        <attr name="aspectRatio" format="float|reference"/>
+    </declare-styleable>
+
+</resources>
