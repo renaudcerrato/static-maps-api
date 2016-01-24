@@ -3,24 +3,27 @@ package com.mypopsy.maps.internal;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-public class URLBuilder {
+import javax.annotation.Nullable;
+
+public class UrlBuilder {
 
     private static final String UTF8 = "UTF-8";
     private final String url;
     private StringBuilder query;
 
-    public URLBuilder(String url) {
+    public UrlBuilder(String url) {
         this.url = url;
     }
 
-    public URLBuilder appendQuery(String key, Object object) {
+    public UrlBuilder appendQuery(String key, Object object) {
         return appendQuery(key, object.toString());
     }
 
-    public URLBuilder appendQuery(String key, String value) {
+    public UrlBuilder appendQuery(String key, @Nullable String value) {
         if(query == null) query = new StringBuilder();
         if(query.length() > 0) query.append('&');
-        query.append(encode(key)).append('=').append(encode(value));
+        query.append(encode(key));
+        if(value != null) query.append('=').append(encode(value));
         return this;
     }
 

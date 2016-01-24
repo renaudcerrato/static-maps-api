@@ -1,12 +1,15 @@
 package com.mypopsy.maps;
 
 import com.mypopsy.maps.internal.PolyLine;
-import com.mypopsy.maps.internal.URLBuilder;
+import com.mypopsy.maps.internal.UrlBuilder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static java.lang.Math.asin;
 import static java.lang.Math.atan2;
@@ -22,6 +25,10 @@ public final class StaticMap {
     private static final String BASE_URL = "maps.googleapis.com/maps/api/staticmap";
     private static final String HTTP = "http://" + BASE_URL;
     private static final String HTTPS = "https://" + BASE_URL;
+
+    public static final int NO_WIDTH = -1;
+    public static final int NO_HEIGHT = -1;
+    public static final int NO_ZOOM = -1;
 
     /**
      * Map Types
@@ -60,10 +67,6 @@ public final class StaticMap {
          */
         PNG("png"),
         /**
-         * @see {@link #PNG}
-         */
-        PNG8("png8"),
-        /**
          * 32-bit PNG format
          */
         PNG32("png32"),
@@ -86,7 +89,8 @@ public final class StaticMap {
         }
     }
 
-    private List<Markers> markers = new ArrayList<>();
+    private List<MarkerGroup> markers = new ArrayList<>();
+    private List<GeoPoint> visible = new ArrayList<>();
     private List<Path> paths = new ArrayList<>();
 
     private GeoPoint center;
@@ -120,13 +124,56 @@ public final class StaticMap {
     }
 
     /**
+     * @see {@link #center(GeoPoint)}
+     * @param address of the center
+     * @return this instance
+     */
+    public StaticMap center(@Nonnull String address) {
+        return center(new GeoPoint(address));
+    }
+
+    /**
+     * Query for the center of the map
+     * @return the current center or null
+     */
+    @Nullable
+    public GeoPoint center() {
+        return center;
+    }
+
+    /**
+     * Images may specify a viewport by specifying visible locations.
+     * The visible parameter instructs the Google Static Maps API service to construct a map such
+     * that the specified locations remain visible (this parameter may be combined with existing
+     * markers or paths to define a visible region as well).
+     * Defining a viewport in this manner obviates the need to specify an exact zoom level.
+     * @param geoPoint to add
+     * @return this instance
+     */
+    public StaticMap addVisible(GeoPoint geoPoint) {
+        visible.add(geoPoint);
+        return this;
+    }
+
+    /**
      * Add a single {@link Marker marker} with default {@link Marker.Style style).
+     * @see {@link #addMarkers(GeoPoint...)}
      * @param latitude of the marker
      * @param longitude of the marker
      * @return this instance
      */
     public StaticMap addMarker(double latitude, double longitude) {
         return addMarkers(new GeoPoint(latitude, longitude));
+    }
+
+    /**
+     * Add a single {@link Marker marker} with default {@link Marker.Style style).
+     * @see {@link #addMarkers(GeoPoint...)}
+     * @param address of the marker
+     * @return this instance
+     */
+    public StaticMap addMarker(String address) {
+        return addMarkers(new GeoPoint(address));
     }
 
     /**
@@ -145,8 +192,16 @@ public final class StaticMap {
      * @return this instance
      */
     public StaticMap addMarkers(Marker.Style style, GeoPoint...markers) {
-        this.markers.add(new Markers(style, markers));
+        this.markers.add(new MarkerGroup(style, markers));
         return this;
+    }
+
+    /**
+     * Query for the current markers.
+     * @return the markers
+     */
+    public List<MarkerGroup> markers() {
+        return markers;
     }
 
     /**
@@ -164,7 +219,6 @@ public final class StaticMap {
      * @param points to add
      * @return this instance
      */
-
     public StaticMap addPath(GeoPoint...points) {
         addPath(null, points);
         return this;
@@ -183,19 +237,31 @@ public final class StaticMap {
 
     /**
      * Clear any previously added {@link Marker marker}.
+     * @see {@link #addMarkers(GeoPoint...)}
      * @return this instance
      */
-    public StaticMap clearMarkers() {
+    public StaticMap resetMarkers() {
         markers.clear();
         return this;
     }
 
     /**
      * Clear any previously added {@link Path path}.
+     * @see {@link #addPath(Path)}
      * @return this instance
      */
-    public StaticMap clearPaths() {
+    public StaticMap resetPaths() {
         paths.clear();
+        return this;
+    }
+
+    /**
+     * Clear any previously added visible {@link GeoPoint point}.
+     * @see {@link #addVisible(GeoPoint)}
+     * @return this instance
+     */
+    public StaticMap resetVisible() {
+        visible.clear();
         return this;
     }
 
@@ -210,6 +276,15 @@ public final class StaticMap {
     }
 
     /**
+     * Query for the current zoom value
+     * @return the current zoom or {@link #NO_ZOOM}
+     */
+    public int zoom() {
+        if(zoom == null) return NO_ZOOM;
+        return zoom;
+    }
+
+    /**
      * The scale value is multiplied with the size to determine the actual output size
      * of the image in pixels, without changing the coverage area of the map.
      * @param scale 1, 2 or 4 (the latter is for Google Maps APIs Premium Plan customers only)
@@ -218,6 +293,16 @@ public final class StaticMap {
     public StaticMap scale(int scale) {
         this.scale = scale;
         return this;
+    }
+
+    /**
+     * Query for current scale value.
+     * @see {@link #scale(int)}
+     * @return the current scale value
+     */
+    public int scale() {
+        if(scale == null) return 1;
+        return scale;
     }
 
     /**
@@ -235,6 +320,24 @@ public final class StaticMap {
     }
 
     /**
+     * Query for the current width value
+     * @return the current width or {@link #NO_WIDTH}
+     */
+    public int width() {
+        if(width == null) return NO_WIDTH;
+        return width;
+    }
+
+    /**
+     * Query for the current height value
+     * @return the current height or {@link #NO_HEIGHT}
+     */
+    public int height() {
+        if(height == null) return NO_HEIGHT;
+        return height;
+    }
+
+    /**
      * Images may be returned in several common web graphics formats: GIF, JPEG and PNG.
      * @see Format
      * @param format
@@ -246,7 +349,16 @@ public final class StaticMap {
     }
 
     /**
-     * API Key
+     * Query for the current {@link Format format}
+     * @return the current format
+     */
+    public Format format() {
+        if(format == null) return Format.PNG;
+        return format;
+    }
+
+    /**
+     * Query for the current API Key
      * @param apiKey from your Google Developer Console
      * @return this instance
      */
@@ -256,13 +368,22 @@ public final class StaticMap {
     }
 
     /**
-     * Map {@link Type type}
+     * Specigies the map {@link Type type}
      * @param type of the map
      * @return this instance
      */
     public StaticMap type(Type type) {
         this.type = type;
         return this;
+    }
+
+    /**
+     * Query for the current map {@link Type type}
+     * @return the {@link Type type} of the map
+     */
+    public Type type() {
+        if(type == null) return Type.ROADMAP;
+        return type;
     }
 
     /**
@@ -286,7 +407,7 @@ public final class StaticMap {
     @Override
     public String toString() {
 
-        URLBuilder builder = new URLBuilder(https ? HTTPS : HTTP);
+        UrlBuilder builder = new UrlBuilder(https ? HTTPS : HTTP);
 
         if(center != null) {
             builder.appendQuery("center", center);
@@ -316,12 +437,16 @@ public final class StaticMap {
             builder.appendQuery("key", apiKey);
         }
 
-        for(Markers markers: this.markers) {
+        for(MarkerGroup markers: this.markers) {
             builder.appendQuery("markers", markers);
         }
 
         for(Path path: paths) {
             builder.appendQuery("path", path);
+        }
+
+        for(GeoPoint point: visible) {
+            builder.appendQuery("visible", point);
         }
 
         return builder.toString();
@@ -336,7 +461,8 @@ public final class StaticMap {
         final Double latitude, longitude;
         final String address;
 
-        public GeoPoint(String address) {
+        public GeoPoint(@Nonnull String address) {
+            //noinspection ConstantConditions
             if(address == null) throw new IllegalArgumentException("address can't be null");
             this.address = address;
             this.latitude = null;
@@ -361,6 +487,7 @@ public final class StaticMap {
             return longitude;
         }
 
+        @Nullable
         public String address() {
             return address;
         }
@@ -374,12 +501,13 @@ public final class StaticMap {
         }
     }
 
-    private static class Markers {
+    public static class MarkerGroup {
 
-        private final Marker.Style style;
-        private final GeoPoint[] points;
+        @Nullable public final Marker.Style style;
+        public final GeoPoint[] points;
 
-        Markers(Marker.Style style, GeoPoint... points) {
+        MarkerGroup(@Nullable Marker.Style style, GeoPoint... points) {
+            if(points == null || points.length == 0) throw new IllegalArgumentException("markers can't be empty");
             this.style = style;
             this.points = points;
         }
@@ -396,21 +524,23 @@ public final class StaticMap {
             super(latitude, longitude);
         }
 
-        public Marker(String address) {
+        public Marker(@Nonnull String address) {
             super(address);
         }
 
         public static class Style {
 
-            static public final Style BLACK  = new Builder().color(0x000000).build();
-            static public final Style PURPLE = new Builder().color(0x800080).build();
-            static public final Style RED    = new Builder().color(0xff0000).build();
-            static public final Style GREY   = new Builder().color(0x808080).build();
-            static public final Style GREEN  = new Builder().color(0x00ff00).build();
-            static public final Style ORANGE = new Builder().color(0xffa500).build();
-            static public final Style YELLOW = new Builder().color(0xffff00).build();
-            static public final Style BLUE   = new Builder().color(0x0000ff).build();
-            static public final Style WHITE  = new Builder().color(0xffffff).build();
+            public static final int DEFAULT_COLOR = 0xff0000;
+
+            static public final Style BLACK  = builder().color(0x000000).build();
+            static public final Style PURPLE = builder().color(0x800080).build();
+            static public final Style RED    = builder().color(0xff0000).build();
+            static public final Style GREY   = builder().color(0x808080).build();
+            static public final Style GREEN  = builder().color(0x00ff00).build();
+            static public final Style ORANGE = builder().color(0xffa500).build();
+            static public final Style YELLOW = builder().color(0xffff00).build();
+            static public final Style BLUE   = builder().color(0x0000ff).build();
+            static public final Style WHITE  = builder().color(0xffffff).build();
 
             /**
              * Size of the {@link Marker marker}(s)
@@ -422,16 +552,36 @@ public final class StaticMap {
                 Size(String value) { this.value = value; }
             }
 
-            public final String icon;
-            public final int color;
-            public final String label;
-            public final Size size;
+            final String icon;
+            final Integer color;
+            final String label;
+            final Size size;
 
-            private Style(Builder builder) {
+            Style(Builder builder) {
                 this.icon = builder.icon;
                 this.color = builder.color;
                 this.size = builder.size;
                 this.label = builder.label;
+            }
+
+            @Nullable
+            public String icon() {
+                return icon;
+            }
+
+            public int color() {
+                if(color == null) return DEFAULT_COLOR;
+                return color;
+            }
+
+            @Nullable
+            public String label() {
+                return label;
+            }
+
+            public Size size() {
+                if(size == null) return Size.NORMAL;
+                return size;
             }
 
             public Builder toBuilder() {
@@ -447,14 +597,14 @@ public final class StaticMap {
                 return join('|',
                         icon != null ? "icon:" + icon : null,
                         size != null && size.value != null ? "size:" + size.value : null,
-                        color != 0 ? "color:" + rgb(color) : null,
+                        color != null ? "color:" + rgb(color) : null,
                         label != null ? "label:" + label : null);
             }
 
             public static class Builder {
 
                 String icon;
-                int color;
+                Integer color;
                 String label;
                 Size size;
 
@@ -471,7 +621,7 @@ public final class StaticMap {
 
 
                 /**
-                 * @see {@link #icon(String) icon(String)}
+                 * @see {@link #icon(String)}
                  * @param icon url
                  * @return this instance
                  */
@@ -491,7 +641,7 @@ public final class StaticMap {
                 }
 
                 /**
-                 * Marker color
+                 * Speicifies the {@link Marker marker} color
                  * @param color RGB 24 bit
                  * @return this instance
                  */
@@ -510,6 +660,18 @@ public final class StaticMap {
                     return this;
                 }
 
+                /**
+                 * Specifies the size of marker.
+                 * If no size parameter is set, the marker will appear in its default (normal) size.
+                 * @see {@link Size}
+                 * @param size of the marker
+                 * @return this instance
+                 */
+                public Builder size(Size size) {
+                    this.size = size;
+                    return this;
+                }
+
                 public Style build() {
                     return new Style(this);
                 }
@@ -519,10 +681,11 @@ public final class StaticMap {
 
     static public class Path {
 
-        private final GeoPoint[] points;
-        private final Style style;
+        @Nullable public final Style style;
+        public final GeoPoint[] points;
 
-        public Path(Style style, GeoPoint...points) {
+        public Path(@Nullable Style style, GeoPoint...points) {
+            if(points == null || points.length == 0) throw new IllegalArgumentException("you must specify geopoints");
             this.style = style;
             this.points = points;
         }
@@ -542,16 +705,39 @@ public final class StaticMap {
 
         static public class Style {
 
-            public final Integer stroke;
-            public final Integer color;
-            public final Integer fillColor;
-            public final boolean geodesic;
+            public static final int DEFAULT_STROKE = 5;
+            public static final int DEFAULT_COLOR = 0xff;
+            public static final int NO_FILL_COLOR = 0;
+
+            final Integer stroke;
+            final Integer color;
+            final Integer fillColor;
+            final boolean geodesic;
 
             private Style(Builder builder) {
                 this.stroke = builder.stroke;
                 this.color = builder.color;
                 this.fillColor = builder.fillColor;
                 this.geodesic = builder.geodesic;
+            }
+
+            public int stroke() {
+                if(stroke == null) return DEFAULT_STROKE;
+                return stroke;
+            }
+
+            public int color() {
+                if(color == null) return DEFAULT_COLOR;
+                return color;
+            }
+
+            public int fillColor() {
+                if(fillColor == null) return NO_FILL_COLOR;
+                return fillColor;
+            }
+
+            public boolean isGeodesic() {
+                return geodesic;
             }
 
             public Builder toBuilder() {
@@ -690,7 +876,7 @@ public final class StaticMap {
         return (color >> 24) & 0xff;
     }
 
-    static private String join(char separator, Object ...objects) {
+    private static String join(char separator, Object ...objects) {
         StringBuilder sb = new StringBuilder();
         for(Object object: objects) {
             if(object == null) continue;
