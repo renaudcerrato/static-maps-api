@@ -1,10 +1,13 @@
 package com.mypopsy.staticmaps.demo.ui;
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -12,20 +15,26 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.target.ViewTarget;
 import com.mypopsy.maps.StaticMap;
 import com.mypopsy.maps.StaticMap.GeoPoint;
 import com.mypopsy.maps.StaticMap.Marker;
+import com.mypopsy.maps.StaticMap.MarkerGroup;
 import com.mypopsy.maps.StaticMap.Path;
 import com.mypopsy.staticmaps.demo.R;
 import com.mypopsy.staticmaps.demo.adapter.BindableViewHolder;
 import com.mypopsy.staticmaps.demo.adapter.BindingArrayRecyclerAdapter;
 import com.mypopsy.staticmaps.demo.app.RecyclerViewFragment;
 import com.mypopsy.staticmaps.demo.utils.PaddingItemDecoration;
+
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.BindDimen;
@@ -46,6 +55,7 @@ public class DemoFragment extends RecyclerViewFragment {
     private static final String ICON_GOOGLE = BASE_MARKER_URL + "google.png";
     private static final String ICON_NETFLIX = BASE_MARKER_URL + "netflix.png";
     private static final String ICON_FACEBOOK = BASE_MARKER_URL + "facebook.png";
+    private static final String ICON_GHOSTBUSTER = BASE_MARKER_URL + "ghostbuster.png";
 
     private final Model[] models = new Model[] {
             new Model("Paris", "5 most visited monuments",
@@ -56,11 +66,11 @@ public class DemoFragment extends RecyclerViewFragment {
                             .marker(ORANGE, new GeoPoint("Musée du Louvre"))
                             .marker(PURPLE, new GeoPoint("Arc de Triomphe"))
             ),
-            new Model("New-York City", "GhostBusters shooting locations",
+            new Model("New-York City", "Ghostbusters filming locations",
                     new StaticMap()
-                            .marker(BLUE.toBuilder().label('F').build(), new GeoPoint(40.7195532,-74.0067987, "Firehouse"))
-                            .marker(RED.toBuilder().label('L').build(), new GeoPoint(40.7529234,-73.9827515, "Public Library"))
-                            .marker(GREEN.toBuilder().label('C').build(), new GeoPoint("Columbia University, NYC"))
+                            .marker(Marker.Style.builder().icon(ICON_GHOSTBUSTER).build(), new GeoPoint(40.7195532,-74.0067987, "Firehouse"))
+                            .marker(RED.toBuilder().label('A').build(), new GeoPoint(40.7529234,-73.9827515, "Public Library"))
+                            .marker(GREEN.toBuilder().label('B').build(), new GeoPoint("Columbia University, NYC"))
             ),
             new Model("Silicon Valley", "Popular Headquarters",
                     new StaticMap()
@@ -70,7 +80,7 @@ public class DemoFragment extends RecyclerViewFragment {
             ),
             new Model("Bermuda Triangle", "Brrrrr.",
                     new StaticMap()
-                            .path(Path.Style.builder().color(Color.TRANSPARENT).fill(0x66FFFF00).build(),
+                            .path(Path.Style.builder().color(Color.TRANSPARENT).fill(0x66ff0000).build(),
                                     new GeoPoint("Miami, Florida"),
                                     new GeoPoint("San Juan, Puerto Rico"),
                                     new GeoPoint("Bermuda Island"))
@@ -131,9 +141,14 @@ public class DemoFragment extends RecyclerViewFragment {
 
         private final Drawable PLACEHOLDER = new ColorDrawable(0xffadcaff);
 
-        @Bind(R.id.toolbar) Toolbar toolbar;
-        @Bind(R.id.map)  ImageView image;
-        @Bind(R.id.progressBar) View progress;
+        @Bind(R.id.toolbar)
+        Toolbar toolbar;
+        @Bind(R.id.map)
+        ImageView image;
+        @Bind(R.id.progressBar)
+        View progress;
+        @Bind(R.id.container_markers)
+        ViewGroup markers;
 
         private Model model;
 
@@ -161,19 +176,50 @@ public class DemoFragment extends RecyclerViewFragment {
                     .listener(this)
                     .into(image);
 
-            switch(model.map.type()) {
-                case ROADMAP: toolbar.getMenu().findItem(R.id.menu_roadmap).setChecked(true); break;
-                case SATELLITE: toolbar.getMenu().findItem(R.id.menu_satellite).setChecked(true); break;
-                case HYBRID: toolbar.getMenu().findItem(R.id.menu_hybrid).setChecked(true); break;
+            switch (model.map.type()) {
+                case ROADMAP:
+                    toolbar.getMenu().findItem(R.id.menu_roadmap).setChecked(true);
+                    break;
+                case SATELLITE:
+                    toolbar.getMenu().findItem(R.id.menu_satellite).setChecked(true);
+                    break;
+                case HYBRID:
+                    toolbar.getMenu().findItem(R.id.menu_hybrid).setChecked(true);
+                    break;
+            }
+
+            markers.setVisibility(View.VISIBLE);
+
+            List<MarkerGroup> groups = model.map.markers();
+            int position = 0;
+            for(MarkerGroup group: groups) {
+                for(GeoPoint point: group.points) {
+                    TextView markerView = getMarkerView(position);
+                    bindMarkerView(group.style, point, markerView);
+                    position++;
+                }
+            }
+
+            while(markers.getChildCount() > position)
+                markers.removeViewAt(markers.getChildCount() - 1);
+
+            if(markers.getChildCount() == 0) {
+                markers.setVisibility(View.GONE);
             }
         }
 
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-            switch(item.getItemId()) {
-                case R.id.menu_roadmap: model.map.type(ROADMAP); break;
-                case R.id.menu_satellite: model.map.type(SATELLITE); break;
-                case R.id.menu_hybrid: model.map.type(HYBRID); break;
+            switch (item.getItemId()) {
+                case R.id.menu_roadmap:
+                    model.map.type(ROADMAP);
+                    break;
+                case R.id.menu_satellite:
+                    model.map.type(SATELLITE);
+                    break;
+                case R.id.menu_hybrid:
+                    model.map.type(HYBRID);
+                    break;
             }
             getRecyclerView().getAdapter().notifyItemChanged(getAdapterPosition());
             return true;
@@ -189,6 +235,54 @@ public class DemoFragment extends RecyclerViewFragment {
         public boolean onResourceReady(GlideDrawable resource, StaticMap model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
             progress.setVisibility(View.GONE);
             return false;
+        }
+
+        private TextView getMarkerView(int position) {
+            if(position >= markers.getChildCount()) {
+                LayoutInflater inflater = LayoutInflater.from(markers.getContext());
+                TextView textView = (TextView) inflater.inflate(R.layout.layout_markers, markers, false);
+                markers.addView(textView);
+                return textView;
+            }else
+                return (TextView) markers.getChildAt(position);
+        }
+
+        private void bindMarkerView(Marker.Style style, GeoPoint point, TextView textView) {
+            Character label = style.label();
+            String text = point.address();
+
+            if (text == null) {
+                text = String.format("%.6f %.6f", point.latitude(), point.longitude());
+            }
+
+            if (label != null) {
+                text = text + " (" + label + ")";
+            }
+
+            textView.setText(text);
+
+            if (style.icon() != null) {
+                Glide.with(DemoFragment.this).load(style.icon())
+                        .asBitmap()
+                        .into(new TextViewTarget(textView));
+            } else {
+                Drawable d = DrawableCompat.wrap(getResources().getDrawable(R.drawable.ic_maps_marker));
+                DrawableCompat.setTint(d, style.color());
+                textView.setCompoundDrawablesWithIntrinsicBounds(d, null, null, null);
+            }
+        }
+    }
+
+    static private class TextViewTarget extends ViewTarget<TextView, Bitmap> {
+
+        public TextViewTarget(TextView view) {
+            super(view);
+        }
+
+        @Override
+        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+            BitmapDrawable d = new BitmapDrawable(getView().getResources(), resource);
+            getView().setCompoundDrawablesWithIntrinsicBounds(d, null, null, null);
         }
     }
 }
