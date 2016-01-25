@@ -662,7 +662,7 @@ public final class StaticMap {
 
             public int color() {
                 if(color == null) return DEFAULT_COLOR;
-                return color;
+                return color | 0xff000000;
             }
 
             @Nullable
@@ -850,11 +850,13 @@ public final class StaticMap {
 
             public int color() {
                 if(color == null) return DEFAULT_COLOR;
+                if(color != 0 && alpha(color) == 0) return color | 0xff000000;
                 return color;
             }
 
             public int fillColor() {
                 if(fillColor == null) return NO_FILL_COLOR;
+                if(fillColor != 0 && alpha(fillColor) == 0) return fillColor | 0xff000000;
                 return fillColor;
             }
 
