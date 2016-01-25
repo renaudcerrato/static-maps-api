@@ -1,15 +1,18 @@
 package com.mypopsy.staticmaps.demo.ui;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.InsetDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +24,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.target.ViewTarget;
 import com.mypopsy.maps.StaticMap;
@@ -32,6 +36,7 @@ import com.mypopsy.staticmaps.demo.R;
 import com.mypopsy.staticmaps.demo.adapter.BindableViewHolder;
 import com.mypopsy.staticmaps.demo.adapter.BindingArrayRecyclerAdapter;
 import com.mypopsy.staticmaps.demo.app.RecyclerViewFragment;
+import com.mypopsy.staticmaps.demo.glide.CropCircleTransformation;
 import com.mypopsy.staticmaps.demo.utils.PaddingItemDecoration;
 
 import java.util.List;
@@ -59,6 +64,7 @@ public class DemoFragment extends RecyclerViewFragment {
 
     private final Model[] models = new Model[] {
             new Model("Paris", "5 most visited monuments",
+                    new GeoPoint("France"),
                     new StaticMap()
                             .marker(BLUE, new GeoPoint("Tour Eiffel"))
                             .marker(RED, new GeoPoint("Cathédrale Notre Dame"))
@@ -67,18 +73,21 @@ public class DemoFragment extends RecyclerViewFragment {
                             .marker(PURPLE, new GeoPoint("Arc de Triomphe"))
             ),
             new Model("New-York City", "Ghostbusters filming locations",
+                    new GeoPoint("Manhattan, NY"),
                     new StaticMap()
                             .marker(Marker.Style.builder().icon(ICON_GHOSTBUSTER).build(), new GeoPoint(40.7195532,-74.0067987, "Firehouse"))
                             .marker(RED.toBuilder().label('A').build(), new GeoPoint(40.7529234,-73.9827515, "Public Library"))
                             .marker(GREEN.toBuilder().label('B').build(), new GeoPoint("Columbia University, NYC"))
             ),
             new Model("Silicon Valley", "Popular Headquarters",
+                    new GeoPoint("California, USA"),
                     new StaticMap()
+                            .marker(Marker.Style.builder().icon(ICON_GOOGLE).build(), new GeoPoint("1600 Amphitheatre Pkwy, Mountain View, CA"))
                             .marker(Marker.Style.builder().icon(ICON_FACEBOOK).build(), new GeoPoint("1 Hacker Way, Menlo Park, CA"))
                             .marker(Marker.Style.builder().icon(ICON_NETFLIX).build(), new GeoPoint("100 Winchester Cir, Los Gatos, CA"))
-                            .marker(Marker.Style.builder().icon(ICON_GOOGLE).build(), new GeoPoint("1600 Amphitheatre Pkwy, Mountain View, CA"))
             ),
             new Model("Bermuda Triangle", "Brrrrr.",
+                    null,
                     new StaticMap()
                             .path(Path.Style.builder().color(Color.TRANSPARENT).fill(0x66ff0000).build(),
                                     new GeoPoint("Miami, Florida"),
@@ -121,10 +130,12 @@ public class DemoFragment extends RecyclerViewFragment {
         final CharSequence title;
         final CharSequence description;
         final StaticMap map;
+        final GeoPoint icon;
 
-        Model(CharSequence title, CharSequence description, StaticMap map) {
+        Model(CharSequence title, CharSequence description, GeoPoint icon, StaticMap map) {
             this.title = title;
             this.description = description;
+            this.icon = icon;
             this.map = map;
         }
     }
@@ -169,6 +180,16 @@ public class DemoFragment extends RecyclerViewFragment {
             toolbar.setTitle(model.title);
             toolbar.setSubtitle(model.description);
             progress.setVisibility(View.VISIBLE);
+
+            if(model.icon != null) {
+                Glide.with(DemoFragment.this)
+                        .load(new StaticMap().center(model.icon))
+                        .asBitmap()
+                        .transform(new CropCircleTransformation(itemView.getContext()))
+                        .into(new ToolbarTarget(toolbar));
+            }
+            else
+                toolbar.setNavigationIcon(null);
 
             Glide.with(DemoFragment.this).load(model.map)
                     .placeholder(PLACEHOLDER)
@@ -262,9 +283,7 @@ public class DemoFragment extends RecyclerViewFragment {
             textView.setText(text);
 
             if (style.icon() != null) {
-                Glide.with(DemoFragment.this).load(style.icon())
-                        .asBitmap()
-                        .into(new TextViewTarget(textView));
+                Glide.with(DemoFragment.this).load(style.icon()).asBitmap().into(new TextViewTarget(textView));
             } else {
                 Drawable d = DrawableCompat.wrap(getResources().getDrawable(R.drawable.ic_maps_marker));
                 DrawableCompat.setTint(d, style.color());
@@ -273,7 +292,28 @@ public class DemoFragment extends RecyclerViewFragment {
         }
     }
 
+    static private class ToolbarTarget extends ViewTarget<Toolbar, Bitmap> {
+
+        public static final int ICON_SIZE = 128; // dp
+
+        public ToolbarTarget(Toolbar toolbar) {
+            super(toolbar);
+        }
+
+        @Override
+        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+            getView().setNavigationIcon(new BitmapDrawable(resource));
+        }
+
+        @Override
+        public void getSize(SizeReadyCallback cb) {
+            cb.onSizeReady(dpToPx(ICON_SIZE), dpToPx(ICON_SIZE));
+        }
+    }
+
     static private class TextViewTarget extends ViewTarget<TextView, Bitmap> {
+
+        public static final int ICON_MARGIN = 4; //dp
 
         public TextViewTarget(TextView view) {
             super(view);
@@ -281,8 +321,14 @@ public class DemoFragment extends RecyclerViewFragment {
 
         @Override
         public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-            BitmapDrawable d = new BitmapDrawable(getView().getResources(), resource);
+            Drawable d = new BitmapDrawable(getView().getResources(), resource);
+            d = new InsetDrawable(d, dpToPx(ICON_MARGIN));
             getView().setCompoundDrawablesWithIntrinsicBounds(d, null, null, null);
         }
+    }
+
+    static private int dpToPx(int dp){
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        return (int) (dp * metrics.density);
     }
 }
