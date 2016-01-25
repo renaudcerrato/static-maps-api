@@ -73,7 +73,7 @@ public class DemoFragment extends RecyclerViewFragment {
                             .marker(PURPLE, new GeoPoint("Arc de Triomphe"))
             ),
             new Model("New-York City", "Ghostbusters filming locations",
-                    new GeoPoint("Manhattan, NY"),
+                    new GeoPoint("NYC"),
                     new StaticMap()
                             .marker(Marker.Style.builder().icon(ICON_GHOSTBUSTER).build(), new GeoPoint(40.7195532,-74.0067987, "Firehouse"))
                             .marker(RED.toBuilder().label('A').build(), new GeoPoint(40.7529234,-73.9827515, "Public Library"))

@@ -11,6 +11,7 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+        buildConfigField "String", "PROJECT_URL", '"https://github.com/renaudcerrato/static-maps-api"'
     }
     buildTypes {
         release {
@@ -23,27 +24,14 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':library')
-
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:recyclerview-v7:23.1.1'
     compile 'com.android.support:cardview-v7:23.1.1'
-    compile "com.android.support:gridlayout-v7:23.1.1"
-
+    compile 'com.android.support:design:23.1.1'
     //ButterKnife
     compile 'com.jakewharton:butterknife:7.0.1'
     // Glide
     compile 'com.github.bumptech.glide:glide:3.6.1'
-    // Retrofit
-    compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'
-    compile 'com.squareup.retrofit:converter-gson:2.0.0-beta2'
-    compile 'com.squareup.retrofit:adapter-rxjava:2.0.0-beta2'
-    compile 'com.squareup.okhttp:logging-interceptor:2.7.0'
-    // RxJava
-    compile 'io.reactivex:rxandroid:1.1.0'
-    // Dagger
-    compile 'com.google.dagger:dagger:2.0.2'
-    apt 'com.google.dagger:dagger-compiler:2.0.2'
-    provided 'org.glassfish:javax.annotation:10.0-b28'
 }
 
 afterEvaluate { project ->

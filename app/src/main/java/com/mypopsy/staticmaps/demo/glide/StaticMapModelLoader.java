@@ -19,7 +19,6 @@ public class StaticMapModelLoader extends BaseGlideUrlLoader<StaticMap> {
         // scale(4) is reserved to premium static map users.
         if(scale == 1) {
             model.scale(scale = 2);
-
         }
 
         return model.size(width/scale, height/scale).toString();
