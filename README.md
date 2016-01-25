@@ -7,9 +7,9 @@ Fluent and clean Java API for [Google Static Maps](https://developers.google.com
 <p align="center"><img src="https://github.com/renaudcerrato/static-maps-api/raw/master/assets/screenshot.png"></p>
 
 
-# How to use
+# How To
 
-Most of the official API is available under a fluent java interface. You'll find below some example usage, for more details, see the [official documentation](https://developers.google.com/maps/documentation/static-maps/intro) or look at the [android demo](https://github.com/renaudcerrato/static-maps-api/blob/master/app/src/main/java/com/mypopsy/staticmaps/demo/ui/DemoFragment.java).
+Most of the official API is available under a fluent java interface. You'll find below some example usage, for more details, see the [official documentation](https://developers.google.com/maps/documentation/static-maps/intro) or look at the [demo source](https://github.com/renaudcerrato/static-maps-api/blob/master/app/src/main/java/com/mypopsy/staticmaps/demo/ui/DemoFragment.java).
 
 
 ## Basic usage
