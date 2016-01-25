@@ -20,6 +20,13 @@ load(map.toURL()); // load into your image view
 ```
 <p align="center"><img src="https://maps.googleapis.com/maps/api/staticmap?center=NYC&size=320x240"/></p>
 
+## Map Type
+
+```java
+new StaticMap().center("NYC").type(HYBRID).size(320, 240);
+```
+<p align="center"><img src="https://maps.googleapis.com/maps/api/staticmap?center=NYC&size=320x240&maptype=hybrid"/></p>
+
 ## Markers
 
 ### Custom colors
