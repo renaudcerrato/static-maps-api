@@ -529,9 +529,13 @@ public final class StaticMap {
         }
 
         public GeoPoint(double latitude, double longitude) {
+            this(latitude, longitude, null);
+        }
+
+        public GeoPoint(double latitude, double longitude, String address) {
             this.latitude = latitude;
             this.longitude = longitude;
-            this.address = null;
+            this.address = address;
         }
 
         public boolean hasCoordinates() {

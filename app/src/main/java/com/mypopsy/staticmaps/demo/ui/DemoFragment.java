@@ -49,18 +49,17 @@ public class DemoFragment extends RecyclerViewFragment {
 
     private final Model[] models = new Model[] {
             new Model("Paris", "5 most visited monuments",
-                    new StaticMap().visible("Paris, France")
+                    new StaticMap()
                             .marker(BLUE, new GeoPoint("Tour Eiffel"))
                             .marker(RED, new GeoPoint("Cathédrale Notre Dame"))
-                            .marker(GREEN, new GeoPoint("Basilique du Sacré Coeur"))
+                            .marker(GREEN, new GeoPoint("Sacré-Coeur, 75018"))
                             .marker(ORANGE, new GeoPoint("Musée du Louvre"))
                             .marker(PURPLE, new GeoPoint("Arc de Triomphe"))
             ),
             new Model("New-York City", "GhostBusters shooting locations",
                     new StaticMap()
-                            .zoom(10)
-                            .marker(BLUE.toBuilder().label('F').build(), new GeoPoint("8 Hook and Ladder, NYC"))
-                            .marker(RED.toBuilder().label('L').build(), new GeoPoint("New-York Public Library, NYC"))
+                            .marker(BLUE.toBuilder().label('F').build(), new GeoPoint(40.7195532,-74.0067987, "Firehouse"))
+                            .marker(RED.toBuilder().label('L').build(), new GeoPoint(40.7529234,-73.9827515, "Public Library"))
                             .marker(GREEN.toBuilder().label('C').build(), new GeoPoint("Columbia University, NYC"))
             ),
             new Model("Silicon Valley", "Popular Headquarters",
@@ -158,6 +157,7 @@ public class DemoFragment extends RecyclerViewFragment {
 
             Glide.with(DemoFragment.this).load(model.map)
                     .placeholder(PLACEHOLDER)
+                    .error(R.drawable.frown_cloud)
                     .listener(this)
                     .into(image);
 
@@ -182,7 +182,6 @@ public class DemoFragment extends RecyclerViewFragment {
         @Override
         public boolean onException(Exception e, StaticMap model, Target<GlideDrawable> target, boolean isFirstResource) {
             progress.setVisibility(View.GONE);
-            image.setImageResource(android.R.drawable.ic_dialog_alert);
             return false;
         }
 
