@@ -1,5 +1,8 @@
 package com.mypopsy.staticmaps.demo.ui;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
@@ -11,9 +14,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.mypopsy.maps.StaticMap;
 import com.mypopsy.maps.StaticMap.GeoPoint;
-import com.mypopsy.maps.StaticMap.Marker.Style;
+import com.mypopsy.maps.StaticMap.Marker;
+import com.mypopsy.maps.StaticMap.Path;
 import com.mypopsy.staticmaps.demo.R;
 import com.mypopsy.staticmaps.demo.adapter.BindableViewHolder;
 import com.mypopsy.staticmaps.demo.adapter.BindingArrayRecyclerAdapter;
@@ -52,15 +59,22 @@ public class DemoFragment extends RecyclerViewFragment {
             new Model("New-York City", "GhostBusters shooting locations",
                     new StaticMap()
                             .zoom(10)
-                            .marker(BLUE, new GeoPoint("8 Hook and Ladder, NYC"))
-                            .marker(RED, new GeoPoint("New-York Public Library, NYC"))
-                            .marker(GREEN, new GeoPoint("Columbia University, NYC"))
+                            .marker(BLUE.toBuilder().label('F').build(), new GeoPoint("8 Hook and Ladder, NYC"))
+                            .marker(RED.toBuilder().label('L').build(), new GeoPoint("New-York Public Library, NYC"))
+                            .marker(GREEN.toBuilder().label('C').build(), new GeoPoint("Columbia University, NYC"))
             ),
-            new Model("Silicon Valley", "Popular HeadQuarters",
+            new Model("Silicon Valley", "Popular Headquarters",
                     new StaticMap()
-                            .marker(Style.builder().icon(ICON_FACEBOOK).build(), new GeoPoint("1 Hacker Way, Menlo Park, CA"))
-                            .marker(Style.builder().icon(ICON_NETFLIX).build(), new GeoPoint("100 Winchester Cir, Los Gatos, CA"))
-                            .marker(Style.builder().icon(ICON_GOOGLE).build(), new GeoPoint("1600 Amphitheatre Pkwy, Mountain View, CA"))
+                            .marker(Marker.Style.builder().icon(ICON_FACEBOOK).build(), new GeoPoint("1 Hacker Way, Menlo Park, CA"))
+                            .marker(Marker.Style.builder().icon(ICON_NETFLIX).build(), new GeoPoint("100 Winchester Cir, Los Gatos, CA"))
+                            .marker(Marker.Style.builder().icon(ICON_GOOGLE).build(), new GeoPoint("1600 Amphitheatre Pkwy, Mountain View, CA"))
+            ),
+            new Model("Bermuda Triangle", "Brrrrr.",
+                    new StaticMap()
+                            .path(Path.Style.builder().color(Color.TRANSPARENT).fill(0x66FFFF00).build(),
+                                    new GeoPoint("Miami, Florida"),
+                                    new GeoPoint("San Juan, Puerto Rico"),
+                                    new GeoPoint("Bermuda Island"))
             ),
     };
 
@@ -114,10 +128,13 @@ public class DemoFragment extends RecyclerViewFragment {
         }
     }
 
-    class ModelViewHolder extends BindableViewHolder<Model> implements Toolbar.OnMenuItemClickListener {
+    class ModelViewHolder extends BindableViewHolder<Model> implements Toolbar.OnMenuItemClickListener, RequestListener<StaticMap, GlideDrawable> {
+
+        private final Drawable PLACEHOLDER = new ColorDrawable(0xffadcaff);
 
         @Bind(R.id.toolbar) Toolbar toolbar;
         @Bind(R.id.map)  ImageView image;
+        @Bind(R.id.progressBar) View progress;
 
         private Model model;
 
@@ -137,7 +154,13 @@ public class DemoFragment extends RecyclerViewFragment {
             this.model = model;
             toolbar.setTitle(model.title);
             toolbar.setSubtitle(model.description);
-            Glide.with(DemoFragment.this).load(model.map).into(image);
+            progress.setVisibility(View.VISIBLE);
+
+            Glide.with(DemoFragment.this).load(model.map)
+                    .placeholder(PLACEHOLDER)
+                    .listener(this)
+                    .into(image);
+
             switch(model.map.type()) {
                 case ROADMAP: toolbar.getMenu().findItem(R.id.menu_roadmap).setChecked(true); break;
                 case SATELLITE: toolbar.getMenu().findItem(R.id.menu_satellite).setChecked(true); break;
@@ -154,6 +177,19 @@ public class DemoFragment extends RecyclerViewFragment {
             }
             getRecyclerView().getAdapter().notifyItemChanged(getAdapterPosition());
             return true;
+        }
+
+        @Override
+        public boolean onException(Exception e, StaticMap model, Target<GlideDrawable> target, boolean isFirstResource) {
+            progress.setVisibility(View.GONE);
+            image.setImageResource(android.R.drawable.ic_dialog_alert);
+            return false;
+        }
+
+        @Override
+        public boolean onResourceReady(GlideDrawable resource, StaticMap model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+            progress.setVisibility(View.GONE);
+            return false;
         }
     }
 }
