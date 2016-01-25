@@ -95,16 +95,22 @@ https://jitpack.io/#renaudcerrato/static-maps-api
 Add it in your root build.gradle at the end of repositories:
 ```
 allprojects {
-		repositories {
-			...
-			maven { url "https://jitpack.io" }
-		}
+	repositories {
+		...
+		maven { url "https://jitpack.io" }
 	}
+}
 ```
 
 Add the dependency:
 ```
 dependencies {
-	        compile 'com.github.renaudcerrato:static-maps-api:1.0.1'
-	}
+	compile 'com.github.renaudcerrato:static-maps-api:1.0.1'
+}
 ```
+
+Or you can simply download the jars:
+
+* [static-maps-api-1.0.1.jar](https://jitpack.io/com/github/renaudcerrato/static-maps-api/1.0.1/static-maps-api-1.0.1.jar)
+* [static-maps-api-1.0.1-javadoc.jar](https://jitpack.io/com/github/renaudcerrato/static-maps-api/1.0.1/static-maps-api-1.0.1-javadoc.jar)
+* [static-maps-api-1.0.1-sources.jar](https://jitpack.io/com/github/renaudcerrato/static-maps-api/1.0.1/static-maps-api-1.0.1-sources.jar)
