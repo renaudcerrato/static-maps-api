@@ -981,34 +981,34 @@ public final class StaticMap {
                     return new Style(this);
                 }
             }
+        }
 
-            /**
-             * Construct a circle {@link Path path} using the given style, center and radius.
-             * @param style for path
-             * @param latitude center
-             * @param longitude center
-             * @param radius in meters
-             * @param count polygon count
-             * @return a circle shaped {@link Path path}
-             */
-            public static Path circle(Style style, double latitude, double longitude, int radius, int count) {
-                final GeoPoint[] points = new GeoPoint[count];
-                final double pi = Math.PI;
-                final double d = radius/6371e3;
+        /**
+         * Construct a circle {@link Path path} using the given style, center and radius.
+         * @param style for path
+         * @param latitude center
+         * @param longitude center
+         * @param radius in meters
+         * @param count polygon count
+         * @return a circle shaped {@link Path path}
+         */
+        public static Path circle(Style style, double latitude, double longitude, int radius, int count) {
+            final GeoPoint[] points = new GeoPoint[count];
+            final double pi = Math.PI;
+            final double d = radius/6371e3;
 
-                latitude = latitude*pi/180f;
-                longitude= longitude*pi/180f;
+            latitude = latitude*pi/180f;
+            longitude= longitude*pi/180f;
 
-                for(int i = 0; i < count; i++) {
-                    double angle = (i*2*pi)/count;
-                    double lat = asin(sin(latitude) * cos(d) + cos(latitude) * sin(d) * cos(angle));
-                    double lon = ((longitude + atan2(sin(angle)*sin(d)*cos(latitude), cos(d)-sin(latitude)*sin(lat))) * 180) / pi;
-                    lat*=180/pi;
-                    points[i] = new GeoPoint(lat, lon);
-                }
-
-                return new Path(style, points);
+            for(int i = 0; i < count; i++) {
+                double angle = (i*2*pi)/count;
+                double lat = asin(sin(latitude) * cos(d) + cos(latitude) * sin(d) * cos(angle));
+                double lon = ((longitude + atan2(sin(angle)*sin(d)*cos(latitude), cos(d)-sin(latitude)*sin(lat))) * 180) / pi;
+                lat*=180/pi;
+                points[i] = new GeoPoint(lat, lon);
             }
+
+            return new Path(style, points);
         }
     }
 
