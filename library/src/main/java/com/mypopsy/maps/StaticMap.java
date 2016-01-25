@@ -18,7 +18,8 @@ import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 
 /**
- * Created by Cerrato Renaud
+ * Fluent interface to the Google Static Maps API.
+ * @author Cerrato Renaud
  * @see <a href="https://developers.google.com/maps/documentation/staticmaps">official documentation</a>
  */
 public final class StaticMap {
@@ -27,8 +28,22 @@ public final class StaticMap {
     private static final String HTTP = "http://" + BASE_URL;
     private static final String HTTPS = "https://" + BASE_URL;
 
+    /**
+     * default scale
+     * @see #scale(int)
+     */
     public static final int DEFAULT_SCALE = 1;
+
+    /**
+     * default {@link Format}
+     * @see #format(Format)
+     */
     public static final Format DEFAULT_FORMAT = Format.PNG;
+
+    /**
+     * default {@link Type}
+     * @see #type(Type)
+     */
     public static final Type DEFAULT_TYPE = Type.ROADMAP;
 
     public static final int NO_WIDTH = -1;
@@ -65,7 +80,7 @@ public final class StaticMap {
     }
 
     /**
-     * Image Format
+     * Image Formats
      */
     public enum Format {
         /**
@@ -85,7 +100,7 @@ public final class StaticMap {
          */
         JPG("jpg"),
         /**
-         * non-progressive JPEG compression format
+         * JPEG format (non-progressive)
          */
         JPG_BASELINE("jpg-baseline");
 
@@ -220,7 +235,7 @@ public final class StaticMap {
     }
 
     /**
-     * Add a single {@link Marker marker} with default {@link Marker.Style style).
+     * Add a single {@link Marker marker} with default {@link Marker.Style style}
      * @see #marker(GeoPoint...)
      * @param latitude of the marker
      * @param longitude of the marker
@@ -231,7 +246,7 @@ public final class StaticMap {
     }
 
     /**
-     * Add a single {@link Marker marker} with default {@link Marker.Style style).
+     * Add a single {@link Marker marker} with default {@link Marker.Style style}.
      * @see #marker(GeoPoint...)
      * @param address of the marker
      * @return this instance
@@ -241,7 +256,7 @@ public final class StaticMap {
     }
 
     /**
-     * Add {@link Marker marker}(s) using default {@link Marker.Style style).
+     * Add {@link Marker marker}(s) using default {@link Marker.Style style}.
      * @see #marker(Marker.Style, GeoPoint...)
      * @param markers to add
      * @return this instance
@@ -251,7 +266,7 @@ public final class StaticMap {
     }
 
     /**
-     * Add {@link Marker marker}(s) using the given {@link Marker.Style style)
+     * Add {@link Marker marker}(s) using the given {@link Marker.Style style}
      * @param style for marker(s)
      * @param markers to add
      * @return this instance
@@ -271,7 +286,7 @@ public final class StaticMap {
     }
 
     /**
-     * Add a {@link Path path} using default {@link Path.Style style)
+     * Add a {@link Path path} using default {@link Path.Style style}
      * @see #path(Path.Style, GeoPoint...)
      * @param path to add
      * @return this instance
@@ -282,7 +297,7 @@ public final class StaticMap {
     }
 
     /**
-     * Add a {@link Path path} using default {@link Path.Style Style style)
+     * Add a {@link Path path} using default {@link Path.Style Style style}
      * @see #path(Path.Style, GeoPoint...)
      * @param points to add
      * @return this instance
@@ -293,7 +308,7 @@ public final class StaticMap {
     }
 
     /**
-     * Add a {@link Path path} using the given {@link Path.Style style)
+     * Add a {@link Path path} using the given {@link Path.Style style}
      * @param style of the path
      * @param points to add
      * @return this instance
@@ -589,9 +604,9 @@ public final class StaticMap {
         @Override
         public String toString() {
             if(style == null || Marker.Style.DEFAULT.equals(style))
-                return join('|', points);
+                return join('|', (Object[]) points);
             else
-                return join('|', style, join('|', points));
+                return join('|', style, join('|', (Object[]) points));
         }
 
         @Override
@@ -602,7 +617,7 @@ public final class StaticMap {
 
         @Override
         public int hashCode() {
-            return hash(style == null ? Marker.Style.DEFAULT : style, hash(points));
+            return hash(style == null ? Marker.Style.DEFAULT : style, hash((Object[]) points));
         }
     }
 
@@ -722,7 +737,7 @@ public final class StaticMap {
                 }
 
                 /**
-                 * @see {@link #icon(String)}
+                 * @see #icon(String)
                  * @param icon url
                  * @return this instance
                  */
@@ -803,7 +818,7 @@ public final class StaticMap {
             if(path != null) {
                 path = "enc:" + path;
             }else{
-                path = join('|', points);
+                path = join('|', (Object[]) points);
             }
 
             if(style == null || Style.DEFAULT.equals(style))
@@ -820,7 +835,7 @@ public final class StaticMap {
 
         @Override
         public int hashCode() {
-            return hash(style == null ? Style.DEFAULT : style, hash(points));
+            return hash(style == null ? Style.DEFAULT : style, hash((Object[]) points));
         }
 
         static public class Style {
@@ -954,7 +969,7 @@ public final class StaticMap {
                 }
 
                 /**
-                 * @see {@link #geodesic(boolean) geodesic(boolean)}
+                 * @see #geodesic(boolean) geodesic(boolean)
                  * @return this instance
                  */
                 public Builder geodesic() {
