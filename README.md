@@ -1,6 +1,4 @@
-[![](https://jitpack.io/v/renaudcerrato/static-maps-api.svg)](https://jitpack.io/#renaudcerrato/static-maps-api)
-
-# Google Static Maps API
+# Google Static Maps API [![](https://jitpack.io/v/renaudcerrato/static-maps-api.svg)](https://jitpack.io/#renaudcerrato/static-maps-api)
 
 Fluent and clean Java interface for [Google Static Maps API](https://developers.google.com/maps/documentation/static-maps/). 
 
