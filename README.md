@@ -2,7 +2,7 @@
 
 Fluent and clean Java API for [Google Static Maps](https://developers.google.com/maps/documentation/static-maps/). 
 
-> [ANDROID DEMO APK](https://github.com/renaudcerrato/static-maps-api/raw/master/app/app-debug.apk)
+> [DEMO APK](https://github.com/renaudcerrato/static-maps-api/raw/master/app/app-debug.apk)
 
 <p align="center"><img src="https://github.com/renaudcerrato/static-maps-api/raw/master/assets/screenshot.png"></p>
 
