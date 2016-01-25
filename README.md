@@ -86,29 +86,3 @@ new StaticMap()
 
 <p align="center"><img src="https://maps.googleapis.com/maps/api/staticmap?size=320x240&path=color%3A0x00000000%7Cfillcolor%3A0xFF000066%7CMiami%2C+Florida%7CSan+Juan%2C+Puerto+Rico%7CBermuda+Island"/></p>
 
-
-# Install
-
-This repository can be found on JitPack:
-
-https://jitpack.io/#renaudcerrato/static-maps-api
-
-Add it in your root build.gradle at the end of repositories:
-```
-allprojects {
-		repositories {
-			...
-			maven { url "https://jitpack.io" }
-		}
-	}
-```
-
-Add the dependency:
-```
-dependencies {
-	        compile 'com.github.renaudcerrato:static-maps-api:1.0.0'
-	}
-```
-
-
-
