@@ -2,12 +2,14 @@
 
 Fluent and clean Java API for [Google Static Maps](https://developers.google.com/maps/documentation/static-maps/). 
 
+> [ANDROID DEMO APK](https://github.com/renaudcerrato/static-maps-api/raw/master/app/app-debug.apk)
+
 <p align="center"><img src="https://github.com/renaudcerrato/static-maps-api/raw/master/assets/screenshot.png"></p>
 
 
 # How to use
 
-Most of the official API is available under a fluent java interface. You'll find below some example usage, for more details, see the [official documentation](https://developers.google.com/maps/documentation/static-maps/intro).
+Most of the official API is available under a fluent java interface. You'll find below some example usage, for more details, see the [official documentation](https://developers.google.com/maps/documentation/static-maps/intro) or look at the [android demo](https://github.com/renaudcerrato/static-maps-api/blob/master/app/src/main/java/com/mypopsy/staticmaps/demo/ui/DemoFragment.java).
 
 
 ## Basic usage
@@ -76,6 +78,30 @@ new StaticMap()
 ```
 
 <p align="center"><img src="https://maps.googleapis.com/maps/api/staticmap?size=320x240&path=color%3A0x00000000%7Cfillcolor%3A0xFF000066%7CMiami%2C+Florida%7CSan+Juan%2C+Puerto+Rico%7CBermuda+Island"/></p>
+
+
+# Install
+
+This repository can be found on JitPack:
+
+https://jitpack.io/#renaudcerrato/static-maps-api
+
+Add it in your root build.gradle at the end of repositories:
+```
+allprojects {
+		repositories {
+			...
+			maven { url "https://jitpack.io" }
+		}
+	}
+```
+
+Add the dependency:
+```
+dependencies {
+	        compile 'com.github.renaudcerrato:static-maps-api:1.0.0'
+	}
+```
 
 
 
