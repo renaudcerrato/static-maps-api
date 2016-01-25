@@ -729,6 +729,9 @@ public final class StaticMap {
                 /**
                  * Specifies an URL to use as the marker's custom icon.
                  * Images may be in PNG, JPEG or GIF formats, though PNG is recommended.
+                 * Icons are limited to sizes of 4096 pixels (64x64 for square images),
+                 * and the Google Static Maps API service allows up to five unique
+                 * custom icons per request.
                  * Note that the Google Static Maps API does not support custom icon URLs
                  * that use HTTPS; the default icon will be displayed.
                  * @param icon url
@@ -998,7 +1001,7 @@ public final class StaticMap {
 
     private static String rgba(int argb) {
         int alpha = alpha(argb);
-        if(alpha == 0) return rgb(argb);
+        if(argb != 0 && alpha == 0) return rgb(argb);
         return String.format("0x%08X", ((argb << 8) | alpha));
     }
 
