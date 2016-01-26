@@ -6,6 +6,10 @@ Fluent and clean Java interface for [Google Static Maps API](https://developers.
 
 <p align="center"><img src="https://github.com/renaudcerrato/static-maps-api/raw/master/assets/screenshot.png"></p>
 
+# Why ?
+
+Because using Google Play Services to show a Google Map may be overkill, or simply because Google Play Services are not available (Amazon, I'm looking at you!).
+
 
 # How To
 
