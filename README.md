@@ -1,4 +1,5 @@
-# Google Static Maps API [![](https://jitpack.io/v/renaudcerrato/static-maps-api.svg)](https://jitpack.io/#renaudcerrato/static-maps-api)
+# Google Static Maps API [![](https://jitpack.io/v/renaudcerrato/static-maps-api.svg)](https://jitpack.io/#renaudcerrato/static-maps-api) [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-static--maps--api-green.svg?style=true)](https://android-arsenal.com/details/1/3103)
+
 
 Fluent and clean Java interface for [Google Static Maps API](https://developers.google.com/maps/documentation/static-maps/). 
 
