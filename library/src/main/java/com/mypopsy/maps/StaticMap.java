@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import java.util.Locale;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -573,7 +574,7 @@ public final class StaticMap {
         @Override
         public String toString() {
             if(hasCoordinates())
-                return String.format("%.6f,%.6f", latitude, longitude);
+                return String.format(Locale.ENGLISH, "%.6f,%.6f", latitude, longitude);
             else
                 return address;
         }
@@ -701,10 +702,10 @@ public final class StaticMap {
             @Override
             public String toString() {
                 return join('|',
-                        icon != null ? "icon:" + icon : null,
-                        size() != DEFAULT_SIZE ? "size:" + size.value : null,
-                        color != null ? "color:" + rgb(color) : null,
-                        label != null ? "label:" + label : null);
+                    icon != null ? "icon:" + icon : null,
+                    size() != DEFAULT_SIZE ? "size:" + size.value : null,
+                    color != null ? "color:" + rgb(color) : null,
+                    label != null ? "label:" + label : null);
             }
 
             @Override
@@ -886,10 +887,10 @@ public final class StaticMap {
             @Override
             public String toString() {
                 return join('|',
-                        stroke() != DEFAULT_STROKE ? "weight:" + stroke : null,
-                        color() != DEFAULT_COLOR ? "color:" + rgba(color) : null,
-                        fillColor() != NO_FILL_COLOR ? "fillcolor:" + rgba(fillColor) : null,
-                        geodesic ? "geodesic:true" : null);
+                    stroke() != DEFAULT_STROKE ? "weight:" + stroke : null,
+                    color() != DEFAULT_COLOR ? "color:" + rgba(color) : null,
+                    fillColor() != NO_FILL_COLOR ? "fillcolor:" + rgba(fillColor) : null,
+                    geodesic ? "geodesic:true" : null);
             }
 
             @Override
@@ -1017,13 +1018,13 @@ public final class StaticMap {
     }
 
     private static String rgb(int argb) {
-        return String.format("0x%06X", argb & 0xffffff);
+        return String.format(Locale.ENGLISH, "0x%06X", argb & 0xffffff);
     }
 
     private static String rgba(int argb) {
         int alpha = alpha(argb);
         if(argb != 0 && alpha == 0) return rgb(argb);
-        return String.format("0x%08X", ((argb << 8) | alpha));
+        return String.format(Locale.ENGLISH, "0x%08X", ((argb << 8) | alpha));
     }
 
     private static int alpha(int color) {
