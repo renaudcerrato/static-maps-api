@@ -6,6 +6,11 @@ dependencies {
     compile 'com.google.code.findbugs:jsr305:3.0.1'
 }
 
+tasks.withType(JavaCompile) {
+    sourceCompatibility = "1.7"
+    targetCompatibility = "1.7"
+}
+
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
